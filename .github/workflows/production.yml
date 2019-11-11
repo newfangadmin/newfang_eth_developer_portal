@@ -1,0 +1,43 @@
+name: Production workflow
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install dependencies, run tests and build for production
+      run: |
+        npm install
+        npm run test:ci
+        npm run build:prod
+      env:
+        CI: true
+    - name: Deploy to production server
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        # Set deploy key
+        SSH_PATH="$HOME/.ssh"
+        mkdir "$SSH_PATH"
+        echo "$DEPLOY_KEY" > "$SSH_PATH/deploy_key"
+        chmod 600 "$SSH_PATH/deploy_key"
+
+        # Do deployment
+        sh -c "rsync -avzr --delete -e 'ssh -i $SSH_PATH/deploy_key -o StrictHostKeyChecking=no' $GITHUB_WORKSPACE/dist root@developer.newfang.io:/var/www/html/newfang_developer_portal"
+
+

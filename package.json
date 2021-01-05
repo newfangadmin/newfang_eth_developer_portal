@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@dfuse/client": "^0.2.6",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "driver.js": "^0.9.7",
     "echarts": "^4.2.1",
     "element-ui": "^2.8.2",
